@@ -1,0 +1,25 @@
+FROM debian:11
+
+# Actualizar e instalar MariaDB
+RUN apt-get update && \
+    apt-get install -y mariadb-server && \
+    apt-get clean
+
+# Copiar el archivo de configuración
+COPY conf/mariadb.conf /etc/mysql/mariadb.conf.d/50-server.cnf
+
+# Asegurar los permisos de los directorios necesarios
+RUN mkdir -p /var/lib/mysql /var/run/mysqld && \
+    chown -R mysql:mysql /var/lib/mysql /var/run/mysqld && \
+    chmod 777 /var/lib/mysql /var/run/mysqld
+
+# Exponer el puerto de MariaDB
+EXPOSE 3306
+
+# Copiar el script de inicio y asegurarse de que sea ejecutable
+COPY ./tools/mariadb.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/mariadb.sh
+
+# Evitar la inicialización en el Dockerfile, se hará en el script de inicio
+ENTRYPOINT [ "/usr/local/bin/mariadb.sh" ]
+

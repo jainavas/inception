@@ -1,0 +1,66 @@
+services:
+  nginx:
+    container_name: nginx
+    build: ./requirements/nginx
+    image: nginx
+    ports:
+      - "443:443"  # Asegúrate de que Nginx esté escuchando en el puerto 443 para HTTPS
+    volumes:
+      - wordpress_data:/var/www/html
+    restart: always
+    networks:
+      - jainavasnet
+    depends_on:
+      - wordpress
+
+  mariadb:
+    container_name: mariadb
+    build: ./requirements/mariadb
+    image: mariadb
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    restart: always
+    networks:
+      - jainavasnet
+    env_file:
+      - .env
+
+  wordpress:
+    container_name: wordpress
+    build: ./requirements/wordpress
+    image: wordpress
+    volumes:
+      - wordpress_data:/var/www/html
+    restart: always
+    networks:
+      - jainavasnet
+    env_file:
+      - .env
+    depends_on:
+      - mariadb
+    # healthcheck:
+      # test: ["CMD", "curl", "-f", "http://localhost:9000"]  # Verifica que WordPress está funcionando en el puerto 9000
+      # interval: 30s
+      # retries: 5
+      # start_period: 10s
+      # timeout: 10s
+
+volumes:
+  mariadb_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/jainavas/data/mariadb
+      o: bind
+
+  wordpress_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/jainavas/data/wordpress
+      o: bind
+
+networks:
+  jainavasnet:
+    driver: bridge
+
