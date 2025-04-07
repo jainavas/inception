@@ -1,5 +1,21 @@
 #!/bin/bash
 
+# Poner la url en hosts
+DOMAIN=${DONAIN_NAME:-$1}
+IP=${2:-127.0.0.1}
+
+if [ -z "$DOMAIN" ]; then
+    echo "DONAIN_NAME not found";
+    exit 1
+fi
+
+if grep -q "$DOMAIN" /etc/hosts; then
+    echo "Domain already present on etc/hosts";
+else
+    echo "$IP  $DOMAIN" | sudo tee -a /etc/hosts > /dev/null
+    echo "Domain added to etc/hosts";
+fi
+
 # Verificar si el archivo wp-config.php ya existe
 if [ -f /var/www/html/wp-config.php ]; then
     echo "Wordpress already exists"
